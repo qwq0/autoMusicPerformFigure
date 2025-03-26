@@ -30,7 +30,7 @@ export class AudioPipeline
         this.audioContext = new AudioContext();
 
         this.mainGainNode = new GainNode(this.audioContext, {
-            gain: 1
+            gain: 0.5
         });
         this.mainGainNode.connect(this.audioContext.destination);
 

@@ -49,6 +49,13 @@ export class Oscillator
     initVolume = 1;
 
     /**
+     * 增益系数
+     * 用于修正不同频率的响度区别
+     * @type {number}
+     */
+    gainRatio = 1;
+
+    /**
      * @param {import("./AudioPipeline.js").AudioPipeline} pipeline
      */
     constructor(pipeline)
@@ -79,16 +86,17 @@ export class Oscillator
      */
     setPitch(offset)
     {
-        this.oscillatorNode.frequency.value = 440 * Math.pow(1.0594630943592953, offset);
-    }
+        let frequency = 440 * Math.pow(1.0594630943592953, offset);
+        this.oscillatorNode.frequency.value = frequency;
 
-    /**
-     * 设置音量
-     * @param {number} volume
-     */
-    setVolume(volume)
-    {
-        this.gainNode.gain.value = volume;
+        if (frequency < 80)
+            this.gainRatio = 1;
+        else if (frequency < 3300)
+            this.gainRatio = 0.4 + 0.6 * (3300 - frequency) / 3220;
+        else if (frequency < 10000)
+            this.gainRatio = 0.4 + 0.1 * (frequency - 3300) / 6700;
+        else
+            this.gainRatio = 0.5;
     }
 
     /**
@@ -101,15 +109,15 @@ export class Oscillator
         let deltaTime = now - this.pressTime;
         if (deltaTime > 3000)
         {
-            this.gainNode.gain.value = this.initVolume * 0.15;
+            this.gainNode.gain.value = this.initVolume * this.gainRatio * 0.15;
         }
         else if (deltaTime < 200)
         {
-            this.gainNode.gain.value = this.initVolume;
+            this.gainNode.gain.value = this.initVolume * this.gainRatio;
         }
         else
         {
-            this.gainNode.gain.value = this.initVolume * (((3000 - deltaTime) / 2800) * 0.85 + 0.15);
+            this.gainNode.gain.value = this.initVolume * this.gainRatio * (((3000 - deltaTime) / 2800) * 0.85 + 0.15);
         }
     }
 
@@ -124,7 +132,8 @@ export class Oscillator
 
         this.free = false;
 
-        this.gainNode.gain.value = this.initVolume;
+        this.update(this.pressTime);
+        this.gainNode.gain.value = this.initVolume * this.gainRatio;
         this.gainNode.connect(this.pipeline.mainGainNode);
         await delayPromise(duration);
         this.gainNode.disconnect(this.pipeline.mainGainNode);

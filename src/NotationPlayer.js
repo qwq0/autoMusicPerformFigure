@@ -245,10 +245,10 @@ export class NotationPlayer
             {
                 let releaseTime = keyReleaseTime.get(now.key);
                 this.performeSequence.push({
-                    time: now.time * 0.6,
+                    time: now.time * 0.63,
                     pitch: now.key - 60,
                     volume: Math.min(1, Math.pow(now.velocity / 127, 1.5)),
-                    duration: (releaseTime != undefined ? (releaseTime - now.time) * 0.6 : 150)
+                    duration: (releaseTime != undefined ? (releaseTime - now.time) * 0.63 : 150)
                 });
             }
             else
