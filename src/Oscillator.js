@@ -86,7 +86,7 @@ export class Oscillator
      */
     setPitch(offset)
     {
-        let frequency = 440 * Math.pow(1.0594630943592953, offset);
+        let frequency = Math.pow(1.0594630943592953, 96.37631656229593 + offset);
         this.oscillatorNode.frequency.value = frequency;
 
         if (frequency < 80)

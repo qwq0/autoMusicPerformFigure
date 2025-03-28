@@ -24,14 +24,21 @@ export class NotationPlayer
     perBarDuration = 600;
 
     /**
+     * 音频管线
      * @type {import("./AudioPipeline.js").AudioPipeline}
      */
     pipeline = null;
 
     /**
+     * 敲击音符回调
      * @type {(pitch: number, duration: number) => void}
      */
     strikeCallback = null;
+
+    /**
+     * 当前正在演奏的id
+     */
+    nowPlayingId = "";
 
     /**
      * @param {import("./AudioPipeline.js").AudioPipeline} pipeline
@@ -284,16 +291,26 @@ export class NotationPlayer
         this.#tidyUp();
 
         let startTime = performance.now() + 100;
+        let playingId = `${Math.floor(startTime)}_${Math.floor(Math.random() * 1e6)}`;
+        this.nowPlayingId = playingId;
         for (let o of this.performeSequence)
         {
             let nowTime = performance.now() - startTime;
-            if (nowTime + 1.5 < o.time)
+            if (nowTime + 2.5 < o.time)
             {
                 await delayPromise(o.time - nowTime);
+                if (this.nowPlayingId != playingId)
+                    break;
             }
             this.pipeline.strikeNode(o.pitch, o.duration, o.volume);
             if (this.strikeCallback)
                 this.strikeCallback(o.pitch, o.duration);
         }
     }
+
+    /**
+     * 停止演奏
+     */
+    stop()
+    { }
 }
