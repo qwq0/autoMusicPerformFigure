@@ -1,6 +1,17 @@
 import { delayPromise } from "./util/delayPromise.js";
 
 /**
+ * 波形类型列表
+ * @type {Array<"sawtooth" | "sine" | "square" | "triangle">}
+ */
+let waveTypeList = [
+    "sawtooth",
+    "square",
+    "triangle",
+    "sine"
+];
+
+/**
  * 振荡器实例
  * 通常由 振荡器音频节点 和 音量节点 组成
  */
@@ -56,15 +67,33 @@ export class Oscillator
     gainRatio = 1;
 
     /**
-     * @param {import("./AudioPipeline.js").AudioPipeline} pipeline
+     * 波形类型
+     * 0 锯齿波
+     * 1 方波
+     * 2 三角波 
+     * 3 正弦波
+     * @type {number}
      */
-    constructor(pipeline)
+    type = 0;
+
+    /**
+     * @param {import("./AudioPipeline.js").AudioPipeline} pipeline
+     * @param {number} type
+     */
+    constructor(pipeline, type)
     {
         this.pipeline = pipeline;
         this.oscillatorNode = new OscillatorNode(pipeline.audioContext, {
             frequency: 440,
-            type: "sawtooth"
+            detune: 0,
+            type: waveTypeList[type],
+            // type: "custom",
+            // periodicWave: new PeriodicWave(pipeline.audioContext, {
+            //     real: [0, 1, 0.33, 0.1089],
+            //     imag: [0, 0, 0, 0]
+            // })
         });
+
         this.oscillatorNode.start();
         this.gainNode = new GainNode(pipeline.audioContext, {
             gain: 1

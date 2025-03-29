@@ -19,6 +19,7 @@ export class NotationPlayer
 
     /**
      * 每小节时间
+     * 仅简谱模式
      * @type {number}
      */
     perBarDuration = 600;
@@ -37,8 +38,23 @@ export class NotationPlayer
 
     /**
      * 当前正在演奏的id
+     * @type {string}
      */
     nowPlayingId = "";
+
+    /**
+     * 停止索引
+     * 表示停止前演奏序列已经演奏的位置
+     * @type {number}
+     */
+    stoppedIndex = 0;
+
+    /**
+     * 演奏倍速
+     * 开始演奏后不可再变化
+     * @type {number}
+     */
+    speed = 1;
 
     /**
      * @param {import("./AudioPipeline.js").AudioPipeline} pipeline
@@ -46,14 +62,16 @@ export class NotationPlayer
     constructor(pipeline)
     {
         this.pipeline = pipeline;
+        this.clear();
     }
 
-    /**
-     * 设置每分钟节拍数
-     * @param {number} bpm
-     */
-    setBpm(bpm)
-    { }
+    clear()
+    {
+        this.nowPlayingId = "";
+        this.stoppedIndex = 0;
+        this.speed = 1;
+        this.performeSequence.length = 0;
+    }
 
     /**
      * 设置字符串曲谱
@@ -61,6 +79,8 @@ export class NotationPlayer
      */
     setsStringScore(scoreString)
     {
+        this.clear();
+
         let i = 0;
         // 小节索引
         let barIndex = 0;
@@ -234,6 +254,8 @@ export class NotationPlayer
                 i++;
             }
         }
+
+        this.#tidyUp();
     }
 
 
@@ -243,6 +265,8 @@ export class NotationPlayer
      */
     setMidiFile(midi)
     {
+        this.clear();
+
         /** @type {Map<number, number>} */
         let keyReleaseTime = new Map();
         for (let i = midi.keySequence.length - 1; i >= 0; i--)
@@ -252,15 +276,15 @@ export class NotationPlayer
             {
                 let releaseTime = keyReleaseTime.get(now.key);
                 this.performeSequence.push({
-                    time: now.time * 0.63,
+                    time: now.tick * midi.tickDuration,
                     pitch: now.key - 60,
                     volume: Math.min(1, Math.pow(now.velocity / 127, 1.5)),
-                    duration: (releaseTime != undefined ? (releaseTime - now.time) * 0.63 : 150)
+                    duration: (releaseTime != undefined ? (releaseTime - now.tick) * midi.tickDuration : 150)
                 });
             }
             else
             {
-                keyReleaseTime.set(now.key, now.time);
+                keyReleaseTime.set(now.key, now.tick);
             }
         }
         this.performeSequence.reverse();
@@ -284,27 +308,46 @@ export class NotationPlayer
     }
 
     /**
-     * 开始演奏
+     * 开始或继续演奏
      */
     async play()
     {
         this.#tidyUp();
 
-        let startTime = performance.now() + 100;
+        let startTime = performance.now() - this.performeSequence[this.stoppedIndex].time / this.speed + 100;
         let playingId = `${Math.floor(startTime)}_${Math.floor(Math.random() * 1e6)}`;
         this.nowPlayingId = playingId;
-        for (let o of this.performeSequence)
+        for (let index = this.stoppedIndex; index < this.performeSequence.length; index++)
         {
+            let o = this.performeSequence[index];
             let nowTime = performance.now() - startTime;
-            if (nowTime + 2.5 < o.time)
+            let deltaTime = (o.time / this.speed) - nowTime;
+            if (deltaTime > 2.5)
             {
-                await delayPromise(o.time - nowTime);
+                await delayPromise(deltaTime);
                 if (this.nowPlayingId != playingId)
+                {
                     break;
+                }
             }
-            this.pipeline.strikeNode(o.pitch, o.duration, o.volume);
+            let duration = o.duration / this.speed;
+            this.pipeline.strikeNode(0, o.pitch + Math.random() * 0.06 - 0.03, duration, o.volume);
+            this.stoppedIndex = index;
             if (this.strikeCallback)
-                this.strikeCallback(o.pitch, o.duration);
+                this.strikeCallback(o.pitch, duration);
+        }
+    }
+
+    /**
+     * 倒带回开头
+     */
+    async rewindToBeginning()
+    {
+        this.stoppedIndex = 0;
+        if(this.nowPlayingId)
+        {
+            this.nowPlayingId = "";
+            await this.play();
         }
     }
 
@@ -312,5 +355,7 @@ export class NotationPlayer
      * 停止演奏
      */
     stop()
-    { }
+    {
+        this.nowPlayingId = "";
+    }
 }

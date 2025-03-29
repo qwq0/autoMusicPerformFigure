@@ -49,39 +49,42 @@ export class AudioPipeline
 
     /**
      * 添加振荡器
+     * @param {number} type
      * @returns {Oscillator}
      */
-    addOscillator()
+    addOscillator(type)
     {
-        let oscillator = new Oscillator(this);
+        let oscillator = new Oscillator(this, type);
         this.oscillatorList.push(oscillator);
         return oscillator;
     }
 
     /**
      * 获取空闲振荡器
+     * @param {number} type
      * @returns {Oscillator}
      */
-    getFreeOscillator()
+    getFreeOscillator(type)
     {
         for (let o of this.oscillatorList)
         {
-            if (o.free)
+            if (o.free && o.type == type)
                 return o;
         }
-        return this.addOscillator();
+        return this.addOscillator(type);
     }
 
     /**
      * 敲响一个音符
+     * @param {number} type
      * @param {number} pitch
      * @param {number} duration
      * @param {number} volume
      * @returns {Promise<void>}
      */
-    async strikeNode(pitch, duration, volume)
+    async strikeNode(type, pitch, duration, volume)
     {
-        let oscillator = this.getFreeOscillator();
+        let oscillator = this.getFreeOscillator(type);
         oscillator.setPitch(pitch);
         oscillator.initVolume = volume;
         await oscillator.strike(duration);

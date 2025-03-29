@@ -6,13 +6,25 @@ export class MidiFile
 {
     /**
      * @type {Array<{
-     *  time: number,
+     *  tick: number,
      *  key: number,
      *  down: boolean,
      *  velocity: number
      * }>}
      */
     keySequence = [];
+
+    /**
+     * 每tick的毫秒数
+     * @type {number}
+     */
+    tickDuration = 0.6;
+
+    /**
+     * 每个四分音符的tick数
+     * @type {number}
+     */
+    tickSpeed = 500;
 
     constructor()
     { }
@@ -50,24 +62,37 @@ export class MidiFile
             { // 弹起
                 let note = chunkData[i++];
                 let velocity = chunkData[i++];
-                this.keySequence.push({
-                    time: nowTime,
-                    key: note,
-                    down: false,
-                    velocity: velocity
-                });
+                if (eventChannel != 10) // 非打击乐
+                {
+                    this.keySequence.push({
+                        tick: nowTime,
+                        key: note,
+                        down: false,
+                        velocity: velocity
+                    });
+                }
+                else // 打击乐
+                {
+                }
                 // console.log("up", note, velocity);
             }
             else if (eventType == 0x90)
             { // 按下
                 let note = chunkData[i++];
                 let velocity = chunkData[i++];
-                this.keySequence.push({
-                    time: nowTime,
-                    key: note,
-                    down: velocity != 0,
-                    velocity: velocity
-                });
+                if (eventChannel != 10) // 非打击乐
+                {
+                    this.keySequence.push({
+                        tick: nowTime,
+                        key: note,
+                        down: velocity != 0,
+                        velocity: velocity
+                    });
+                }
+                else // 打击乐
+                {
+                    console.log("打击乐");
+                }
                 // console.log("down", note, velocity);
             }
             else if (eventType == 0xa0)
@@ -110,6 +135,15 @@ export class MidiFile
                 let metaEventType = chunkData[i++];
                 let eventLength = 0;
                 ({ value: eventLength, endIndex: i } = getVint(chunkData, i));
+
+                if (metaEventType == 0x51)
+                { // 速度
+                    // 一个四分音符的微秒数
+                    let value = (chunkView.getUint8(i) << 16) | chunkView.getUint16(i + 1, false);
+                    this.tickDuration = value / (this.tickSpeed * 1000);
+                    // console.log("speed", value / 1000, this.tickDuration);
+                }
+
                 i += eventLength;
             }
             else
@@ -152,6 +186,7 @@ export class MidiFile
                 if (!(chunkData[4] & 0x80))
                 {
                     let tickSpeed = chunkView.getUint16(4, false);
+                    ret.tickSpeed = tickSpeed;
                 }
                 else
                 {
