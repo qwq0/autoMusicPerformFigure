@@ -1,6 +1,6 @@
-import { AudioPipeline } from "./AudioPipeline.js";
-import { MidiFile } from "./MidiFile.js";
-import { NotationPlayer } from "./NotationPlayer.js";
+import { AudioPipeline } from "./audio/AudioPipeline.js";
+import { MidiFile } from "./notation/MidiFile.js";
+import { NotationPlayer } from "./notation/NotationPlayer.js";
 
 /**
  * 自动演奏人偶 上下文

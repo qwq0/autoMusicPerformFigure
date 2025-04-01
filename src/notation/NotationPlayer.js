@@ -1,5 +1,5 @@
 import { MidiFile } from "./MidiFile.js";
-import { delayPromise } from "./util/delayPromise.js";
+import { delayPromise } from "../util/delayPromise.js";
 
 /**
  * 谱面演奏者
@@ -26,7 +26,7 @@ export class NotationPlayer
 
     /**
      * 音频管线
-     * @type {import("./AudioPipeline.js").AudioPipeline}
+     * @type {import("../audio/AudioPipeline.js").AudioPipeline}
      */
     pipeline = null;
 
@@ -57,7 +57,7 @@ export class NotationPlayer
     speed = 1;
 
     /**
-     * @param {import("./AudioPipeline.js").AudioPipeline} pipeline
+     * @param {import("../audio/AudioPipeline.js").AudioPipeline} pipeline
      */
     constructor(pipeline)
     {

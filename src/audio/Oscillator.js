@@ -1,4 +1,4 @@
-import { delayPromise } from "./util/delayPromise.js";
+import { delayPromise } from "../util/delayPromise.js";
 
 /**
  * 波形类型列表
@@ -83,10 +83,34 @@ export class Oscillator
     constructor(pipeline, type)
     {
         this.pipeline = pipeline;
-        this.oscillatorNode = new OscillatorNode(pipeline.audioContext, {
+        this.type = type;
+
+        this.gainNode = new GainNode(this.pipeline.audioContext, {
+            gain: 1
+        });
+        this.refreshOscillatorNode();
+    }
+
+    get endNode()
+    {
+        return this.gainNode;
+    }
+
+    /**
+     * 刷新振荡器节点
+     */
+    refreshOscillatorNode()
+    {
+        if (this.oscillatorNode)
+        {
+            this.oscillatorNode.disconnect(this.gainNode);
+            this.oscillatorNode.stop();
+        }
+
+        this.oscillatorNode = new OscillatorNode(this.pipeline.audioContext, {
             frequency: 440,
             detune: 0,
-            type: waveTypeList[type],
+            type: waveTypeList[this.type],
             // type: "custom",
             // periodicWave: new PeriodicWave(pipeline.audioContext, {
             //     real: [0, 1, 0.33, 0.1089],
@@ -95,15 +119,7 @@ export class Oscillator
         });
 
         this.oscillatorNode.start();
-        this.gainNode = new GainNode(pipeline.audioContext, {
-            gain: 1
-        });
         this.oscillatorNode.connect(this.gainNode);
-    }
-
-    get endNode()
-    {
-        return this.gainNode;
     }
 
     /**
@@ -115,6 +131,9 @@ export class Oscillator
      */
     setPitch(offset)
     {
+        if (this.type == 3)
+            this.refreshOscillatorNode();
+
         let frequency = Math.pow(1.0594630943592953, 96.37631656229593 + offset);
         this.oscillatorNode.frequency.value = frequency;
 
@@ -136,18 +155,41 @@ export class Oscillator
     update(now)
     {
         let deltaTime = now - this.pressTime;
+
+        let volume = this.initVolume * this.gainRatio;
         if (deltaTime > 3000)
-        {
-            this.gainNode.gain.value = this.initVolume * this.gainRatio * 0.15;
+        { // 长时间按下的音量
+            volume *= 0.15;
         }
         else if (deltaTime < 200)
-        {
-            this.gainNode.gain.value = this.initVolume * this.gainRatio;
+        { // 渐强结束后 一小段时间维持最大音量
+            volume *= 1;
+        }
+        else
+        { // 一段时间后渐弱
+            volume *= (((3000 - deltaTime) / 2800) * 0.85 + 0.15);
+        }
+
+        if (this.type == 3)
+        { // 对于正弦波
+            if (deltaTime < 50)
+            { // 刚开始按下的渐强
+                volume *= deltaTime / 50;
+            }
+            if (this.releaseTime - now < 70)
+            { // 弹起时渐弱
+                volume *= (this.releaseTime - now) / 70;
+            }
         }
         else
         {
-            this.gainNode.gain.value = this.initVolume * this.gainRatio * (((3000 - deltaTime) / 2800) * 0.85 + 0.15);
+            if (this.releaseTime - now < 30)
+            { // 弹起时渐弱
+                volume *= (this.releaseTime - now) / 30;
+            }
         }
+
+        this.gainNode.gain.value = Math.max(volume, 0);
     }
 
     /**

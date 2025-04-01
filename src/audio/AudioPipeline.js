@@ -44,7 +44,7 @@ export class AudioPipeline
                     this.oscillatorList[i].update(now);
                 }
             }
-        }, 20);
+        }, 14);
     }
 
     /**

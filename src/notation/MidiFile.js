@@ -91,7 +91,7 @@ export class MidiFile
                 }
                 else // 打击乐
                 {
-                    console.log("打击乐");
+                    // console.log("打击乐");
                 }
                 // console.log("down", note, velocity);
             }
@@ -211,7 +211,7 @@ export class MidiFile
 }
 
 /**
- * 获取边长型数
+ * 获取变长型整数
  * @param {Uint8Array} data
  * @param {number} index
  * @returns {{

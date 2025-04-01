@@ -1,7 +1,7 @@
-import { AudioPipeline } from "../src/AudioPipeline.js";
+import { AudioPipeline } from "../src/audio/AudioPipeline.js";
 import { AutoMusicPerformFigure } from "../src/AutoMusicPerformFigure.js";
-import { MidiFile } from "../src/MidiFile.js";
-import { NotationPlayer } from "../src/NotationPlayer.js";
+import { MidiFile } from "../src/notation/MidiFile.js";
+import { NotationPlayer } from "../src/notation/NotationPlayer.js";
 import { delayPromise } from "../src/util/delayPromise.js";
 
 
