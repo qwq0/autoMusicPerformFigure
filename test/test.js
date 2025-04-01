@@ -38,7 +38,7 @@ import { delayPromise } from "../src/util/delayPromise.js";
 
         figure.addScore({
             name: "一千光年",
-            midiUrl: "./midi/一千光年___One-thousand_Light-years.mid"
+            midiUrl: "./midi/一千光年.mid"
         });
         // figure.addScore({
         //     name: "三日月ステップ",
@@ -62,7 +62,11 @@ import { delayPromise } from "../src/util/delayPromise.js";
         });
         figure.addScore({
             name: "少女レイ",
-            midiUrl: "./midi/75838_Shoujo-Rei.mid"
+            midiUrl: "./midi/Shoujo-Rei.mid"
+        });
+        figure.addScore({
+            name: "Bittersweet",
+            midiUrl: "./midi/Bittersweet.mid"
         });
 
         figure.notationPlayer.strikeCallback = async (pitch, duration) =>
