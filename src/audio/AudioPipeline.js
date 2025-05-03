@@ -25,6 +25,12 @@ export class AudioPipeline
      */
     mainGainNode = null;
 
+    /**
+     * 主延迟节点
+     * @type {DelayNode}
+     */
+    mainDelayNode = null;
+
     constructor()
     {
         this.audioContext = new AudioContext();
@@ -32,7 +38,15 @@ export class AudioPipeline
         this.mainGainNode = new GainNode(this.audioContext, {
             gain: 0.5
         });
-        this.mainGainNode.connect(this.audioContext.destination);
+
+        this.mainDelayNode = new DelayNode(this.audioContext, {
+            channelCount: 2,
+            delayTime: 0.03,
+            maxDelayTime: 0.5
+        });
+
+        this.mainGainNode.connect(this.mainDelayNode);
+        this.mainDelayNode.connect(this.audioContext.destination);
 
         setInterval(() =>
         { // 更新正在工作的振荡器

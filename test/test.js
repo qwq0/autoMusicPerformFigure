@@ -68,6 +68,58 @@ import { delayPromise } from "../src/util/delayPromise.js";
             name: "Bittersweet",
             midiUrl: "./midi/Bittersweet.mid"
         });
+        figure.addScore({
+            name: "捕食ひ捕食",
+            midiUrl: "./midi/捕食ひ捕食.mid"
+        });
+        figure.addScore({
+            name: "1000年生きてる",
+            midiUrl: "./midi/1000年生きてる.mid"
+        });
+        figure.addScore({
+            name: "魔法少女とチョコレゐト",
+            midiUrl: "./midi/魔法少女とチョコレゐト.mid"
+        });
+        figure.addScore({
+            name: "熱異常",
+            midiUrl: "./midi/熱異常.mid"
+        });
+        figure.addScore({
+            name: "水死体にもどらないで",
+            midiUrl: "./midi/水死体にもどらないで.mid"
+        });
+        figure.addScore({
+            name: "きゅうくらりん",
+            midiUrl: "./midi/きゅうくらりん.mid"
+        });
+        figure.addScore({
+            name: "くろうばあないと",
+            midiUrl: "./midi/くろうばあないと.mid"
+        });
+        figure.addScore({
+            name: "ジレンマ",
+            midiUrl: "./midi/ジレンマ.mid"
+        });
+        figure.addScore({
+            name: "バベル",
+            midiUrl: "./midi/バベル.mid"
+        });
+        figure.addScore({
+            name: "フューチャー・イヴ",
+            midiUrl: "./midi/フューチャー・イヴ.mid"
+        });
+        figure.addScore({
+            name: "メズマライザー",
+            midiUrl: "./midi/メズマライザー.mid"
+        });
+        figure.addScore({
+            name: "ももいろの鍵",
+            midiUrl: "./midi/ももいろの鍵.mid"
+        });
+        figure.addScore({
+            name: "Liar_Dancer",
+            midiUrl: "./midi/Liar_Dancer.mid"
+        });
 
         figure.notationPlayer.strikeCallback = async (pitch, duration) =>
         {
